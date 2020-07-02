@@ -7,24 +7,33 @@ import * as movieHelpers from './movie-browser.helpers';
 import MovieList from './movie-list/movie-list.component';
 import * as scrollHelpers from '../common/scroll.helpers';
 import MovieModal from './movie-modal/movie-modal.container';
-
+import URL from './movie-browser.service';
+const axios = require('axios');
+ 
 class MovieBrowser extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       currentPage: 1,
-      currentMovies: []
+      currentMovies: [],
+      allMovies: []
     };
-    // Binds the handleScroll to this class (MovieBrowser)
-    // which provides access to MovieBrowser's props
-    // Note: You don't have to do this if you call a method
-    // directly from a lifecycle method
+  // this.componentDidMount()
     this.handleScroll = this.handleScroll.bind(this);
+    
+  //  this.performSearch()
   }
 
   componentDidMount() {
-    window.onscroll = this.handleScroll;
+    axios.get(URL).then(res => {
+      console.log(res.data.results);
+      // this.state.currentMovies = res.data.results;
+      this.setState({currentMovies: res.data.results.slice(0,8)})
+      this.setState({allMovies: res.data.results})
+    })
+    // window.onscroll = this.handleScroll;
     this.props.getTopMovies(this.state.currentPage);
+    
   }
 
   componentWillUnmount() {
@@ -42,20 +51,33 @@ class MovieBrowser extends React.Component {
       }
     }
   }
+  performSearch(event)  {
+    const searchTerm = event.target.value;
+    const boundObj = this;
+    boundObj.props.getSearchUrl(searchTerm);
+    console.log('using movie fb', searchTerm)
+  } 
 
   render() {
     const {topMovies} = this.props;
-    const movies = movieHelpers.getMoviesList(topMovies.response);
-
+    console.log(topMovies.response, 'top movies')
+    console.log(this.state.currentMovies)
+    // const movies = movieHelpers.getMoviesList(topMovies.response);
+    // const movies = this.state.currentMovies;
+    const movies = movieHelpers.getMoviesList(this.state.currentMovies);
     return (
       <div>
         <AppBar title='Movie Browser' />
         <Grid>
           <Row>
-            <p>Search will go here</p>
+            {/* <p>Search will go here</p> */}
+            <input placeholder="Enter movie name"
+              onChange={this.performSearch.bind(this)}
+              className="form-control search-input" />
+
           </Row>
           <Row>
-            <MovieList movies={movies} isLoading={topMovies.isLoading} />
+            <MovieList movies={movies} />
           </Row>
         </Grid>
         <MovieModal />

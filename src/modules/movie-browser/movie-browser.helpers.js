@@ -14,6 +14,7 @@ export const updateMoviePictureUrls = (movieResult, width = 300) => {
 
 export const getMoviesList = (moviesResponse) => {
   return !!moviesResponse ? ([
-    ...moviesResponse.results.map(movieResult => updateMoviePictureUrls(movieResult))
+   // ...moviesResponse.results.map(movieResult => updateMoviePictureUrls(movieResult))
+   ...moviesResponse.map(movieResult => updateMoviePictureUrls(movieResult))
   ]) : null;
 }
